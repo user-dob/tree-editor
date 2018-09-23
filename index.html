@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            padding: 0px;
+            margin: 0px;
+        }
+
+        svg {
+            user-select: none;
+            margin: auto;
+            display: block;
+        }
+
+        g.legend circle {
+            stroke: black;
+            cursor: pointer;
+        }
+
+        g.legend text {
+            text-anchor: start;
+            fill: black;
+            cursor: pointer;
+        }
+
+        g.node circle {
+            fill: white;
+            stroke: #ccc;
+            cursor: pointer;
+        }
+
+        g.node circle.selected {
+            stroke-width: 2;
+            stroke: black;
+        }
+
+        g.node text {
+            fill: black;
+            text-anchor: middle;
+            cursor: pointer;
+        }
+
+        g.link path {
+            stroke: #ccc;
+            cursor: pointer;
+        }
+
+        g.link path.selected {
+            stroke: black;
+            stroke-dasharray: 10,2;
+        }
+
+        path.dragline {
+            stroke: #ccc;
+            pointer-events: none;
+        }
+
+        path.dragline.hidden {
+            stroke-width: 0;
+        }
+
+        g.link textPath {
+            text-anchor: middle;
+            fill: black;
+            cursor: pointer;
+        }
+    </style>
+
+    <script src="//d3js.org/d3.v4.js"></script>
+</head>
+<body>
+    <script type="module">
+        import {TreeEditor} from './src/TreeEditor.js';
+
+        const legend = [
+			{
+				type: 'type1',
+				color: 'red',
+				label: 'type1 type1',
+				shortLabel: '+'
+			},
+			{
+				type: 'type2',
+				color: 'green',
+				label: 'type2',
+				shortLabel: '-'
+			}
+        ];
+
+        const data = {
+            "name": "+",
+            "children": [
+                {
+                    "name": "+"
+                },
+                {
+                    "name": "-",
+					"children": [
+						{
+							"name": "+",
+							"children": [
+								{
+									"name": "+"
+								},
+								{
+									"name": "-"
+								}
+							]
+						},
+						{
+							"name": "-"
+						}
+					]
+				}
+            ]
+        }
+
+        const treeEditor = new TreeEditor('body', {legend});
+
+        treeEditor.setData(data);
+
+    </script>
+</body>
+</html>
