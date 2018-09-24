@@ -117,10 +117,19 @@ export class TreeEditor {
 		if (nodeEl.node()) {
 			const [node] = nodeEl.data();
 			node.data.type = legend.type;
-			this.draw();
+		} else {
+			const data = {type: legend.type};
+			const tree = d3.hierarchy(data);
+			data.id = this.uniqId;
+			tree.x = dragLegendX;
+			tree.y = dragLegendY;
+			tree.depth = Math.round(this.scale.invert(dragLegendX)) - 1;
+
+			this.trees.push(tree);
 		}
 
 		this.dragLegend.remove();
+		this.draw();
 	}
 
 	getLegendProperty(type, propertyName, defaultValue = '') {
@@ -311,6 +320,7 @@ export class TreeEditor {
 
 					if (this.selectedLink) {
 						const [node] = this.selectedLink.data();
+						debugger
 						if (node.parent) {
 							if (Array.isArray(node.parent.children)) {
 								node.parent.children = node.parent.children.filter(item => item !== node);
