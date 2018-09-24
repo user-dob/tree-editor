@@ -23,7 +23,13 @@
             cursor: pointer;
         }
 
-        g.legend text {
+        g.legend text.short-label {
+            text-anchor: middle;
+            fill: black;
+            cursor: pointer;
+        }
+
+        g.legend text.label {
             text-anchor: start;
             fill: black;
             cursor: pointer;
@@ -72,7 +78,7 @@
         }
     </style>
 
-    <script src="//d3js.org/d3.v4.js"></script>
+    <script src="//d3js.org/d3.v5.js"></script>
 </head>
 <body>
     <script type="module">
@@ -80,41 +86,41 @@
 
         const legend = [
 			{
-				type: 'type1',
+				type: 'A',
 				color: 'red',
-				label: 'type1 type1',
-				shortLabel: '+'
+				label: 'type A',
+				shortLabel: 'A'
 			},
 			{
-				type: 'type2',
+				type: 'B',
 				color: 'green',
-				label: 'type2',
-				shortLabel: '-'
+				label: 'type B',
+				shortLabel: 'B'
 			}
         ];
 
         const data = {
-            "name": "+",
-            "children": [
+			type: 'A',
+            children: [
                 {
-                    "name": "+"
+                    type: 'A'
                 },
                 {
-                    "name": "-",
-					"children": [
+					type: 'B',
+					children: [
 						{
-							"name": "+",
-							"children": [
+							type: 'A',
+							children: [
 								{
-									"name": "+"
+									type: 'A'
 								},
 								{
-									"name": "-"
+									type: 'B'
 								}
 							]
 						},
 						{
-							"name": "-"
+							type: 'B'
 						}
 					]
 				}

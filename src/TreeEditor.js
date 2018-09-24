@@ -57,6 +57,16 @@ export class TreeEditor {
 		}
 	}
 
+	getTranslation(transform) {
+		const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+		g.setAttributeNS(null, 'transform', transform);
+		const matrix = g.transform.baseVal.consolidate().matrix;
+		return {
+			x: matrix.e,
+			y: matrix.f
+		};
+	}
+
 	xAxis(g) {
 		const xAxis = d3.axisBottom()
 			.ticks(this.options.steps)
@@ -76,8 +86,11 @@ export class TreeEditor {
 	}
 
 	onDragLegendStart(el) {
+		const step = Math.round(this.scale.invert(d3.event.x));
+		const x = this.scale(step);
+
 		this.dragLegend = d3.select(el).clone(true)
-			.attr('transform', `translate(0,30)`);
+			.attr('transform', `translate(${x},30)`);
 
 		this.g.node().appendChild(this.dragLegend.node());
 	}
@@ -87,11 +100,42 @@ export class TreeEditor {
 		const x = this.scale(step);
 
 		this.dragLegend
-			.attr('transform', `translate(${x},${d3.event.y + 30})`);
+			.attr('transform', `translate(${x},${d3.event.y})`);
 	}
 
 	onDragLegendEnd(el) {
+		const [legend] = this.dragLegend.data();
+		const transform = this.getTranslation(this.dragLegend.attr('transform'));
+		const dragLegendX = transform.x;
+		const dragLegendY = transform.y;
+
+		const nodeEl = this.g.selectAll('g.node').select(this.bind(e => {
+			const {x, y} = this.getTranslation(e.getAttribute('transform'));
+			return Math.pow((dragLegendX - x), 2) + Math.pow((dragLegendY - y), 2) < 100 ? e : null
+		}));
+
+		if (nodeEl.node()) {
+			const [node] = nodeEl.data();
+			node.data.type = legend.type;
+			this.draw();
+		}
+
 		this.dragLegend.remove();
+	}
+
+	getLegendProperty(type, propertyName, defaultValue = '') {
+		if (!this._legendMap) {
+			this._legendMap = this.options.legend.reduce((legends, item) => {
+				legends[item.type] = item;
+				return legends;
+			}, {});
+		}
+
+		const legend = this._legendMap[type];
+		if (legend) {
+			return legend[propertyName] || defaultValue;
+		}
+		return defaultValue;
 	}
 
 	createLegend() {
@@ -102,6 +146,7 @@ export class TreeEditor {
 			.data(this.options.legend);
 
 		const drag = d3.drag()
+			.container(this.g.node())
 			.on('start', this.bind(this.onDragLegendStart))
 			.on('drag', this.bind(this.onDragLegendDrag))
 			.on('end', this.bind(this.onDragLegendEnd));
@@ -111,7 +156,7 @@ export class TreeEditor {
 			.attr('class', 'legend')
 			.attr('transform', (d, index, legend) => {
 				const prevLegend = this.options.legend[index - 1];
-				const offset = prevLegend ? 8 * prevLegend.label.length + 10 : 0;
+				const offset = prevLegend ? 8 * prevLegend.label.length + 20 : 0;
 				return `translate(${offset},0)`;
 			})
 			.call(g => {
@@ -123,6 +168,15 @@ export class TreeEditor {
 			.call(g => {
 				return g
 					.append('text')
+					.attr('class', 'short-label')
+					.attr('x', 0)
+					.attr('y', 4)
+					.text(d => d.shortLabel || '');
+			})
+			.call(g => {
+				return g
+					.append('text')
+					.attr('class', 'label')
 					.attr('x', 15)
 					.attr('y', 5)
 					.text(d => d.label);
@@ -291,7 +345,6 @@ export class TreeEditor {
 					.append('text')
 					.attr('x', 0)
 					.attr('y', 4)
-					.text(d => d.data.name)
 					.on('mousedown', this.bind(el => d3.select(el.parentNode).select('circle').dispatch('mousedown')))
 					.on('mouseup', this.bind(el => d3.select(el.parentNode).select('circle').dispatch('mouseup')));
 			});
@@ -311,6 +364,14 @@ export class TreeEditor {
 
 		nodeUpdate.transition()
 			.duration(this.options.duration);
+
+		nodeUpdate
+			.select('circle')
+			.style('fill', d => this.getLegendProperty(d.data.type, 'color', 'white'));
+
+		nodeUpdate
+			.select('text')
+			.text(d => this.getLegendProperty(d.data.type, 'shortLabel'));
 
 		const nodeExit = node.exit().transition()
 			.duration(this.options.duration)
