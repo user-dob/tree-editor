@@ -16,23 +16,39 @@
             user-select: none;
             margin: auto;
             display: block;
+            font-size: 12px;
         }
 
-        g.legend circle {
-            stroke: black;
+        .axis .domain {
+            display: none;
+        }
+
+        .axis.x .tick line {
+            stroke: #ddd;
+            opacity: 0.8;
+        }
+
+
+        g.legend {
             cursor: pointer;
         }
 
         g.legend text.short-label {
             text-anchor: middle;
             fill: black;
-            cursor: pointer;
+        }
+
+        g.legend text.short-label tspan {
+            dominant-baseline: central;
         }
 
         g.legend text.label {
             text-anchor: start;
             fill: black;
-            cursor: pointer;
+        }
+
+        g.legend text.label tspan {
+            dominant-baseline: central;
         }
 
         g.node circle {
@@ -52,8 +68,13 @@
             cursor: pointer;
         }
 
+        g.node text tspan {
+            dominant-baseline: central;
+        }
+
         g.link path {
             stroke: #ccc;
+            fill: white;
             cursor: pointer;
         }
 
@@ -64,6 +85,7 @@
 
         path.dragline {
             stroke: #ccc;
+            fill: white;
             pointer-events: none;
         }
 
@@ -82,30 +104,36 @@
 </head>
 <body>
     <script type="module">
-        import {TreeEditor} from './src/TreeEditor.js';
+        import { TreeEditor } from './src/TreeEditor.js';
 
-        const legend = [
-			{
-				type: 'A',
-				color: 'red',
-				label: 'type A',
-				shortLabel: 'A'
-			},
-			{
-				type: 'B',
-				color: 'green',
-				label: 'type B',
-				shortLabel: 'B'
-			}
-        ];
+        const options = {
+			legend: [
+				{
+					type: 'A',
+					color: 'red',
+					label: 'type A',
+					shortLabel: 'A'
+				},
+				{
+					type: 'B',
+					color: 'green',
+					label: 'type B',
+					shortLabel: 'B'
+				}
+            ],
+			children: [
+				{label: 'yes'},
+				{label: 'no'}
+            ]
+        };
 
-        const data = {
+		const data = {
 			type: 'A',
-            children: [
-                {
-                    type: 'A'
-                },
-                {
+			children: [
+				{
+					type: 'A'
+				},
+				{
 					type: 'B',
 					children: [
 						{
@@ -124,12 +152,12 @@
 						}
 					]
 				}
-            ]
-        }
+			]
+		}
 
-        const treeEditor = new TreeEditor('body', {legend});
+		window.treeEditor = new TreeEditor('body', options);
 
-        treeEditor.setData(data);
+		window.treeEditor.setData(data);
 
     </script>
 </body>
